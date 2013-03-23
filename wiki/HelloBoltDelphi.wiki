@@ -10,7 +10,39 @@ HelloBolt系列教程通过7个课时由浅到深的讲解BOLT界面引擎的关
 = 支持Bolt的Delphi环境搭建 =
 
 主要是实现Bolt的DLL头文件的转换，即从C语言转换到Pascal。
-为了完成HelloBolt系列用到的api，需要转换的是：
-XLUE.h、XLGraphic.h、XLLuaRuntime.h
+为了完成HelloBolt系列用到的api，需要转换的是：XLUE.h、XLGraphic.h、XLLuaRuntime.h
+以XLUE.h为例，转换后的XLUE.pas为：（只转换了HelloBolt系列用到的api）
+{{{
+unit XLUE;
+
+interface
+
+uses
+  Windows;
+
+  function XLUE_InitLoader(void: Pointer): Long; stdcall;
+  function XLUE_LoadXAR(xarName: PAnsiChar): Long; stdcall;
+  function XLUE_UnloadAllXAR: Long; stdcall;
+  function XLUE_AddXARSearchPath(xarSearhPath: PWideChar): Long; stdcall;
+  function XLUE_Uninit(void: Pointer): Long; stdcall;
+  function XLUE_UninitLuaHost(void: Pointer): Long; stdcall;
+  function XLUE_UninitLoader(void: Pointer): Long; stdcall;
+  function XLUE_UninitHandleMap(void: Pointer): Long; stdcall;
+
+implementation
+
+const
+  XLUE_DLL = 'XLUE.dll';
+
+  function XLUE_InitLoader; external XLUE_DLL name 'XLUE_InitLoader';
+  function XLUE_LoadXAR; external XLUE_DLL name 'XLUE_LoadXAR';
+  function XLUE_UnloadAllXAR; external XLUE_DLL name 'XLUE_UnloadAllXAR';
+  function XLUE_AddXARSearchPath; external XLUE_DLL name 'XLUE_AddXARSearchPath';
+  function XLUE_Uninit; external XLUE_DLL name 'XLUE_Uninit';
+  function XLUE_UninitLuaHost; external XLUE_DLL name 'XLUE_UninitLuaHost';
+  function XLUE_UninitLoader; external XLUE_DLL name 'XLUE_UninitLoader';
+  function XLUE_UninitHandleMap; external XLUE_DLL name 'XLUE_UninitHandleMap';
+end.
+}}}
 
 = Delphi与Lua的交互 =
