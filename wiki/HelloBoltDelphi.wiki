@@ -2,12 +2,13 @@
 
 = Introduction =
 
-Add your content here.
+HelloBolt系列教程通过7个课时由浅到深的讲解BOLT界面引擎的关键概念。
+前面1-6个教程主要在讲述XML+Lua实现界面，只有第1个教程涉及VC++环境的搭建，第7个教程讲述C++代码与Lua环境的交互。
+那么作为Delphi环境的移植，就主要分述两块内容：1）支持Bolt的Delphi环境搭建 2）Delphi与Lua的交互。使用XML+Lua实现界面的部分请参照原教程。
 
 
-= Details =
+= 支持Bolt的Delphi环境 =
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+主要是实现Bolt的DLL头文件的转换，即从C语言转换到Pascal。
+为了完成HelloBolt系列用到的api，需要转换的是：
+XLUE.h、XLGraphic.h、XLLuaRuntime.h
