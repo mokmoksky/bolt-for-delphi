@@ -102,13 +102,13 @@ uses
     wszModulePath: array[0..MAX_PATH-1] of WideChar;
     ret: Long;
   begin
-      GetModuleFileNameW(0, wszModulePath, MAX_PATH);
-	    PathAppend(wszModulePath, '..\..\samples\HelloBolt\XAR');
-      //设置XAR的搜索路径
-      XLUE_AddXARSearchPath(wszModulePath);
-      //加载主XAR,此时会执行该XAR的启动脚本onload.lua
-      ret := XLUE_LoadXAR('HelloBolt6');
-      Result := ret = 0;
+    GetModuleFileNameW(0, wszModulePath, MAX_PATH);
+    PathAppend(wszModulePath, '..\..\samples\HelloBolt\XAR');
+    //设置XAR的搜索路径
+    XLUE_AddXARSearchPath(wszModulePath);
+    //加载主XAR,此时会执行该XAR的启动脚本onload.lua
+    ret := XLUE_LoadXAR('HelloBolt6');
+    Result := ret = 0;
   end;
 
   procedure UninitXLUE;
@@ -136,14 +136,14 @@ begin
     Exit;
   end;
 
-	// 主消息循环:
-	while GetMessage(msg, 0, 0, 0) do
-	begin
-		TranslateMessage(msg);
-		DispatchMessage(msg);
-	end;
+  // 主消息循环:
+  while GetMessage(msg, 0, 0, 0) do
+  begin
+    TranslateMessage(msg);
+    DispatchMessage(msg);
+  end;
 
-	UninitXLUE();
+  UninitXLUE();
 end.
 }}}
 
