@@ -45,7 +45,7 @@ const
 end.
 }}}
 
-实现头文件后，就可以编写Delphi实现代码（所有课程唯一区别就是“XLUE_LoadXAR('HelloBolt1');”这句，载入1-7个不同的XAR就有不同效果）：
+实现头文件后，就可以编写Delphi实现代码（所有课程唯一区别就是“XLUE_LoadXAR('HelloBolt#');”这句，其中#为1-7）：
 {{{
 program HelloBolt1;
 
