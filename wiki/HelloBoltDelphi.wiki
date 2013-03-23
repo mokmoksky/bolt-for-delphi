@@ -45,4 +45,105 @@ const
 end.
 }}}
 
+实现头文件后，就可以编写Delphi实现代码（所有课程唯一区别就是“XLUE_LoadXAR('HelloBolt1');”这句，载入1-7个不同的XAR就有不同效果）：
+{{{
+program HelloBolt1;
+
+{$R *.res}
+
+uses
+  Windows, Shlwapi, Messages,
+  XLUE, XLGraphic, XLLuaRuntime, Lua;
+
+  function LuaErrorHandle(luaState: lua_State; const pExtInfo: PWideChar;
+    const luaErrorString: PWideChar; pStackInfo:PXL_LRT_ERROR_STACK): Integer;
+  {$j+}
+    const s_bEnter : Boolean = False;
+  {$j-}
+  var
+    str: WideString;
+  begin
+    if not s_bEnter then
+    begin
+      s_bEnter := True;
+      if pStackInfo <> nil then
+      begin
+        str := luaErrorString;
+        str := str + ' @ ' + pExtInfo;
+        MessageBoxW(0, luaErrorString, '为了帮助我们改进质量,请反馈此脚本错误', MB_ICONERROR or MB_OK);
+      end
+      else
+        MessageBoxW(0, luaErrorString, '为了帮助我们改进质量,请反馈此脚本错误', MB_ICONERROR or MB_OK);
+    end;
+    Result := 0;
+  end;
+
+  function InitXLUE: BOOL;
+  var
+    param: XLGraphicParam;
+  begin
+    //初始化图形库
+    XL_PrepareGraphicParam(@param);
+    param.textType := XLTEXT_TYPE_FREETYPE;
+    XL_InitGraphicLib(@param);
+    XL_SetFreeTypeEnabled(True);
+    //初始化XLUE,这函数是一个复合初始化函数
+    //完成了初始化Lua环境,标准对象,XLUELoader的工作
+    XLUE_InitLoader(nil);
+
+    //设置一个简单的脚本出错提示
+    XLLRT_ErrorHandle(@LuaErrorHandle);
+    Result := True;
+  end;
+
+  function LoadMainXAR: BOOL;
+  var
+    wszModulePath: array[0..MAX_PATH-1] of WideChar;
+    ret: Long;
+  begin
+      GetModuleFileNameW(0, wszModulePath, MAX_PATH);
+	    PathAppend(wszModulePath, '..\..\samples\HelloBolt\XAR');
+      //设置XAR的搜索路径
+      XLUE_AddXARSearchPath(wszModulePath);
+      //加载主XAR,此时会执行该XAR的启动脚本onload.lua
+      ret := XLUE_LoadXAR('HelloBolt6');
+      Result := ret = 0;
+  end;
+
+  procedure UninitXLUE;
+  begin
+    //退出流程
+    XLUE_Uninit(nil);
+    XLUE_UninitLuaHost(nil);
+    XL_UnInitGraphicLib();
+    XLUE_UninitHandleMap(nil);
+  end;
+
+
+var
+  msg: TMSG;
+begin
+  if not InitXLUE then
+  begin
+    MessageBoxW(0, '初始化XLUE 失败!', '错误', MB_OK);
+    Exit;
+  end;
+
+  if not LoadMainXAR then
+  begin
+    MessageBoxW(0, 'Load XAR失败!', '错误', MB_OK);
+    Exit;
+  end;
+
+	// 主消息循环:
+	while GetMessage(msg, 0, 0, 0) do
+	begin
+		TranslateMessage(msg);
+		DispatchMessage(msg);
+	end;
+
+	UninitXLUE();
+end.
+}}}
+
 = Delphi与Lua的交互 =
