@@ -7,8 +7,10 @@ HelloBolt系列教程通过7个课时由浅到深的讲解BOLT界面引擎的关
 那么作为Delphi环境的移植，就主要分述两块内容：1）支持Bolt的Delphi环境搭建 2）Delphi与Lua的交互。使用XML+Lua实现界面的部分请参照原教程。
 
 
-= 支持Bolt的Delphi环境 =
+= 支持Bolt的Delphi环境搭建 =
 
 主要是实现Bolt的DLL头文件的转换，即从C语言转换到Pascal。
 为了完成HelloBolt系列用到的api，需要转换的是：
 XLUE.h、XLGraphic.h、XLLuaRuntime.h
+
+= Delphi与Lua的交互 =
