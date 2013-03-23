@@ -1,4 +1,4 @@
-使用Delphi实现[http://xldoc.xl7.xunlei.com/0000000018/00000000180001000029.html 官方示例项目HelloBolt]
+使用Delphi实现[http://xldoc.xl7.xunlei.com/0000000018/00000000180001000029.html 官方示例项目HelloBolt]。作者bianbian （bianbian.org@gmail.com，2307504@qq.com）
 
 = Introduction =
 
