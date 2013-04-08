@@ -1,6 +1,9 @@
 使用Delphi实现[http://xldoc.xl7.xunlei.com/0000000018/00000000180001000029.html 官方示例项目HelloBolt]。
 作者bianbian （http://bianbian.org  bianbian.org@gmail.com  2307504@qq.com）
 
+此文同步地址：
+[http://bianbian.org/504/bolt-delphi-hellobolt/ bolt官方示例项目HelloBolt的Delphi实现（上）]
+
 = Introduction =
 
 HelloBolt系列教程通过7个课时由浅到深的讲解BOLT界面引擎的关键概念。
