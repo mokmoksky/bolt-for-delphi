@@ -1,0 +1,153 @@
+使用Delphi实现[官方示例项目HelloBolt](http://xldoc.xl7.xunlei.com/0000000018/00000000180001000029.html)。
+作者bianbian （http://bianbian.org  bianbian.org@gmail.com  2307504@qq.com）
+
+此文同步地址：
+[bolt官方示例项目HelloBolt的Delphi实现（上）](http://bianbian.org/504/bolt-delphi-hellobolt/)
+
+# Introduction #
+
+HelloBolt系列教程通过7个课时由浅到深的讲解BOLT界面引擎的关键概念。
+前面1-6个教程主要在讲述XML+Lua实现界面，只有第1个教程涉及VC++环境的搭建，第7个教程讲述C++代码与Lua环境的交互。
+那么作为Delphi环境的移植，就主要分述两块内容：1）支持Bolt的Delphi环境搭建 2）Delphi与Lua的交互。使用XML+Lua实现界面的部分请参照原教程。
+
+
+# 支持Bolt的Delphi环境搭建 #
+
+主要是实现Bolt的DLL头文件的转换，即从C语言转换到Pascal。
+为了完成HelloBolt系列用到的api，需要转换的是：XLUE.h、XLGraphic.h、XLLuaRuntime.h。
+以XLUE.h为例，转换后的XLUE.pas为：（只转换了HelloBolt系列用到的api）
+```
+unit XLUE;
+
+interface
+
+uses
+  Windows;
+
+  function XLUE_InitLoader(void: Pointer): Long; stdcall;
+  function XLUE_LoadXAR(xarName: PAnsiChar): Long; stdcall;
+  function XLUE_UnloadAllXAR: Long; stdcall;
+  function XLUE_AddXARSearchPath(xarSearhPath: PWideChar): Long; stdcall;
+  function XLUE_Uninit(void: Pointer): Long; stdcall;
+  function XLUE_UninitLuaHost(void: Pointer): Long; stdcall;
+  function XLUE_UninitLoader(void: Pointer): Long; stdcall;
+  function XLUE_UninitHandleMap(void: Pointer): Long; stdcall;
+
+implementation
+
+const
+  XLUE_DLL = 'XLUE.dll';
+
+  function XLUE_InitLoader; external XLUE_DLL name 'XLUE_InitLoader';
+  function XLUE_LoadXAR; external XLUE_DLL name 'XLUE_LoadXAR';
+  function XLUE_UnloadAllXAR; external XLUE_DLL name 'XLUE_UnloadAllXAR';
+  function XLUE_AddXARSearchPath; external XLUE_DLL name 'XLUE_AddXARSearchPath';
+  function XLUE_Uninit; external XLUE_DLL name 'XLUE_Uninit';
+  function XLUE_UninitLuaHost; external XLUE_DLL name 'XLUE_UninitLuaHost';
+  function XLUE_UninitLoader; external XLUE_DLL name 'XLUE_UninitLoader';
+  function XLUE_UninitHandleMap; external XLUE_DLL name 'XLUE_UninitHandleMap';
+end.
+```
+
+实现头文件后，就可以编写Delphi实现代码（所有课程唯一区别就是“XLUE\_LoadXAR('HelloBolt#');”这句，其中#为1-7）：
+```
+program HelloBolt1;
+
+{$R *.res}
+
+uses
+  Windows, Shlwapi, Messages,
+  XLUE, XLGraphic, XLLuaRuntime, Lua;
+
+  function LuaErrorHandle(luaState: lua_State; const pExtInfo: PWideChar;
+    const luaErrorString: PWideChar; pStackInfo:PXL_LRT_ERROR_STACK): Integer;
+  {$j+}
+    const s_bEnter : Boolean = False;
+  {$j-}
+  var
+    str: WideString;
+  begin
+    if not s_bEnter then
+    begin
+      s_bEnter := True;
+      if pStackInfo <> nil then
+      begin
+        str := luaErrorString;
+        str := str + ' @ ' + pExtInfo;
+        MessageBoxW(0, luaErrorString, '为了帮助我们改进质量,请反馈此脚本错误', MB_ICONERROR or MB_OK);
+      end
+      else
+        MessageBoxW(0, luaErrorString, '为了帮助我们改进质量,请反馈此脚本错误', MB_ICONERROR or MB_OK);
+    end;
+    Result := 0;
+  end;
+
+  function InitXLUE: BOOL;
+  var
+    param: XLGraphicParam;
+  begin
+    //初始化图形库
+    XL_PrepareGraphicParam(@param);
+    param.textType := XLTEXT_TYPE_FREETYPE;
+    XL_InitGraphicLib(@param);
+    XL_SetFreeTypeEnabled(True);
+    //初始化XLUE,这函数是一个复合初始化函数
+    //完成了初始化Lua环境,标准对象,XLUELoader的工作
+    XLUE_InitLoader(nil);
+
+    //设置一个简单的脚本出错提示
+    XLLRT_ErrorHandle(@LuaErrorHandle);
+    Result := True;
+  end;
+
+  function LoadMainXAR: BOOL;
+  var
+    wszModulePath: array[0..MAX_PATH-1] of WideChar;
+    ret: Long;
+  begin
+    GetModuleFileNameW(0, wszModulePath, MAX_PATH);
+    PathAppend(wszModulePath, '..\..\samples\HelloBolt\XAR');
+    //设置XAR的搜索路径
+    XLUE_AddXARSearchPath(wszModulePath);
+    //加载主XAR,此时会执行该XAR的启动脚本onload.lua
+    ret := XLUE_LoadXAR('HelloBolt6');
+    Result := ret = 0;
+  end;
+
+  procedure UninitXLUE;
+  begin
+    //退出流程
+    XLUE_Uninit(nil);
+    XLUE_UninitLuaHost(nil);
+    XL_UnInitGraphicLib();
+    XLUE_UninitHandleMap(nil);
+  end;
+
+
+var
+  msg: TMSG;
+begin
+  if not InitXLUE then
+  begin
+    MessageBoxW(0, '初始化XLUE 失败!', '错误', MB_OK);
+    Exit;
+  end;
+
+  if not LoadMainXAR then
+  begin
+    MessageBoxW(0, 'Load XAR失败!', '错误', MB_OK);
+    Exit;
+  end;
+
+  // 主消息循环:
+  while GetMessage(msg, 0, 0, 0) do
+  begin
+    TranslateMessage(msg);
+    DispatchMessage(msg);
+  end;
+
+  UninitXLUE();
+end.
+```
+
+# Delphi与Lua的交互 #
